@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CT Mobility Overview — Coway | 29 May 2026 14:16</title>
+<title>CT Mobility Overview — Coway | 29 May 2026 14:33</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
@@ -418,7 +418,57 @@
   .all-table tr:hover td { background: #fafbfc; }
   .all-table .mono { font-family: 'Space Mono', monospace; }
   .all-table .right { text-align: right; }
-  .all-task { color: var(--accent); font-family: 'Space Mono', monospace; }
+  .all-task {
+    color: var(--accent); font-family: 'Space Mono', monospace;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .all-task:hover { color: var(--accent2); }
+
+  /* ── VISIT DETAIL MODAL ── */
+  .vd-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 5000; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  }
+  .vd-backdrop.open { opacity: 1; pointer-events: all; }
+  .vd-card {
+    background: var(--surface); border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+    width: 380px; max-width: 90vw;
+    transform: translateY(12px); transition: transform 0.2s ease;
+    overflow: hidden;
+  }
+  .vd-backdrop.open .vd-card { transform: translateY(0); }
+  .vd-header {
+    background: var(--accent); padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .vd-title {
+    font-family: 'Space Mono', monospace; font-size: 12px;
+    font-weight: 700; color: #fff; letter-spacing: 0.05em;
+  }
+  .vd-close {
+    background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
+    width: 24px; height: 24px; color: #fff; font-size: 14px; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .vd-close:hover { background: rgba(255,255,255,0.35); }
+  .vd-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .vd-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .vd-key {
+    font-size: 10px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; flex-shrink: 0;
+  }
+  .vd-val { font-size: 12px; font-weight: 600; color: var(--text); text-align: right; }
+  .vd-sep { height: 1px; background: var(--border); }
+  .vd-maps-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 4px; padding: 10px; background: #e8f4fc;
+    border: 1px solid #b3d9f2; border-radius: 8px;
+    color: var(--accent); font-size: 12px; font-weight: 600;
+    text-decoration: none; transition: background 0.15s;
+  }
+  .vd-maps-btn:hover { background: #d0eaf8; }
   .all-status-pill { font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 600; display: inline-block; }
   .all-status-completed { background: rgba(0,201,122,0.12); color: var(--green); }
   .all-status-ready { background: rgba(0,201,122,0.12); color: var(--green); }
@@ -469,7 +519,7 @@
 <body>
 
 <!-- DATA REFRESH TOPBAR -->
-<div class="data-topbar" id="data-topbar" data-updated="2026-05-29T14:16:17">
+<div class="data-topbar" id="data-topbar" data-updated="2026-05-29T14:33:33">
   <div class="dtb-left">
     <div class="dtb-dot"></div>
     <span class="dtb-label">Live Data · CT Mobility</span>
@@ -902,6 +952,25 @@ function renderList() {
   }).join('');
 }
 
+window.showVisitDetail = function(taskId) {
+  const v = (window._visitDetailMap || {})[taskId];
+  if (!v) return;
+  document.getElementById('vd-task').textContent    = taskId;
+  document.getElementById('vd-ct').textContent      = v.name;
+  document.getElementById('vd-branch').textContent  = v.branch || '—';
+  document.getElementById('vd-time').textContent    = v.in + ' – ' + (v.out || '—');
+  document.getElementById('vd-dur').textContent     = fmtDur(v.dur);
+  document.getElementById('vd-status').textContent  = v.status || '—';
+  document.getElementById('vd-maps').href = `https://maps.google.com/?q=${v.lat},${v.lon}`;
+  document.getElementById('vd-backdrop').classList.add('open');
+};
+
+window.closeVisitDetail = function() {
+  document.getElementById('vd-backdrop').classList.remove('open');
+};
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVisitDetail(); });
+
 window.focusVisit = function(idx) {
   const v = window._sortedVisits[idx];
   if (!v) return;
@@ -999,6 +1068,10 @@ function renderAllView() {
     `<div class="all-sum-card"><div class="all-sum-val ${c.cls}">${c.val}</div><div class="all-sum-lbl">${c.lbl}</div></div>`
   ).join('');
 
+  // Global map untuk lookup visit detail per task
+  window._visitDetailMap = {};
+  currentVisits.forEach(v => { window._visitDetailMap[v.task] = v; });
+
   // Group by branch → technician
   const byBranch = {};
   currentVisits.forEach(v => {
@@ -1030,7 +1103,7 @@ function renderAllView() {
         return `<tr>
           <td class="mono">${v.in} – ${v.out||'—'}</td>
           <td>${fmtDur(v.dur)}</td>
-          <td><span class="all-task">${v.task}</span></td>
+          <td><span class="all-task" onclick="showVisitDetail('${v.task}')">${v.task}</span></td>
           <td><span class="all-status-pill ${sCls}">${v.status||'-'}</span></td>
           <td>${flags}</td>
         </tr>`;
@@ -1593,6 +1666,27 @@ window.flashRefresh = function() {
     setInterval(tick, 1000);
   })();
 </script>
-<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 29 May 2026 14:16&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
+<!-- VISIT DETAIL MODAL -->
+<div class="vd-backdrop" id="vd-backdrop" onclick="if(event.target===this)closeVisitDetail()">
+  <div class="vd-card">
+    <div class="vd-header">
+      <span class="vd-title" id="vd-task">—</span>
+      <button class="vd-close" onclick="closeVisitDetail()">✕</button>
+    </div>
+    <div class="vd-body">
+      <div class="vd-row"><span class="vd-key">Technician</span><span class="vd-val" id="vd-ct">—</span></div>
+      <div class="vd-row"><span class="vd-key">Branch</span><span class="vd-val" id="vd-branch">—</span></div>
+      <div class="vd-sep"></div>
+      <div class="vd-row"><span class="vd-key">Time</span><span class="vd-val" id="vd-time">—</span></div>
+      <div class="vd-row"><span class="vd-key">Duration</span><span class="vd-val" id="vd-dur">—</span></div>
+      <div class="vd-row"><span class="vd-key">Status</span><span class="vd-val" id="vd-status">—</span></div>
+      <div class="vd-sep"></div>
+      <a class="vd-maps-btn" id="vd-maps" href="#" target="_blank" rel="noopener">
+        📍 Open in Google Maps
+      </a>
+    </div>
+  </div>
+</div>
+<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 29 May 2026 14:33&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
 </body>
 </html>
