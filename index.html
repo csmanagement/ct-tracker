@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CT Mobility Overview — Coway | 04 Jun 2026 16:45</title>
+<title>CT Mobility Overview — Coway | 04 Jun 2026 16:59</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
@@ -523,7 +523,7 @@
 <body>
 
 <!-- DATA REFRESH TOPBAR -->
-<div class="data-topbar" id="data-topbar" data-updated="2026-06-04T16:45:52">
+<div class="data-topbar" id="data-topbar" data-updated="2026-06-04T16:59:45">
   <div class="dtb-left">
     <div class="dtb-dot"></div>
     <span class="dtb-label">Live Data · CT Mobility</span>
@@ -1625,8 +1625,8 @@ window.flashRefresh = function() {
 <script>
   // ── DATA REFRESH TOPBAR COUNTDOWN ──
   (function () {
-    // Pipeline jalan di menit ke-15 & ke-45 → dashboard refresh 2 menit kemudian
-    const REFRESH_MINUTES = [17, 47];
+    // Pipeline jalan di menit ke-18 & ke-48 → dashboard refresh 2 menit kemudian
+    const REFRESH_MINUTES = [20, 50];
 
     const topbar      = document.getElementById('data-topbar');
     const lastEl      = document.getElementById('dtb-last');
@@ -1637,7 +1637,7 @@ window.flashRefresh = function() {
     const updatedStr  = topbar ? topbar.dataset.updated : '';
     const updatedDate = updatedStr ? new Date(updatedStr) : new Date();
 
-    // Hitung waktu refresh berikutnya (menit ke-17 atau ke-47)
+    // Hitung waktu refresh berikutnya (menit ke-20 atau ke-50)
     function getNextRefresh() {
       const now = new Date();
       for (const t of REFRESH_MINUTES) {
@@ -1647,7 +1647,7 @@ window.flashRefresh = function() {
           return next;
         }
       }
-      // Udah lewat :47 → refresh berikutnya :17 jam depan
+      // Udah lewat :50 → refresh berikutnya :20 jam depan
       const next = new Date(now);
       next.setHours(now.getHours() + 1);
       next.setMinutes(REFRESH_MINUTES[0], 0, 0);
@@ -1660,7 +1660,7 @@ window.flashRefresh = function() {
 
     let nextRefresh = getNextRefresh();
 
-    // Refresh tepat di menit ke-17/47
+    // Refresh tepat di menit ke-20/50
     function scheduleReload() {
       const delay = Math.max(0, nextRefresh - Date.now());
       setTimeout(() => {
@@ -1718,6 +1718,6 @@ window.flashRefresh = function() {
     </div>
   </div>
 </div>
-<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 04 Jun 2026 16:45&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
+<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 04 Jun 2026 16:59&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
 </body>
 </html>
