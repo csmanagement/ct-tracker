@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CT Mobility Overview — Coway | 12 Jun 2026 13:16</title>
+<title>CT Mobility Overview — Coway | 12 Jun 2026 13:23</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
@@ -515,7 +515,7 @@
 <body>
 
 <!-- DATA REFRESH TOPBAR -->
-<div class="data-topbar" id="data-topbar" data-updated="2026-06-12T13:16:35">
+<div class="data-topbar" id="data-topbar" data-updated="2026-06-12T13:23:16">
   <div class="dtb-left">
     <div class="dtb-dot"></div>
     <span class="dtb-label">Live Data · CT Mobility</span>
@@ -849,6 +849,7 @@ function makeMarker(v) {
     <div class="popup-row"><span class="popup-key">Duration</span><span class="popup-val">${fmtDur(v.dur)}</span></div>
     <div class="popup-row"><span class="popup-key">Task</span><span class="popup-val">${v.task}</span></div>
     <div class="popup-row"><span class="popup-key">Status</span><span class="popup-val">${v.status}</span></div>
+    <div class="popup-row"><span class="popup-key">Gap</span><span class="popup-val">${fmtGap(v.gap_min)}</span></div>
     ${flags.length ? `<div class="popup-flag">⚠ ${flags.join(' · ')}</div>` : ''}
     <a href="https://maps.google.com/?q=${v.lat},${v.lon}" target="_blank" rel="noopener"
       style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;
@@ -963,6 +964,9 @@ window.showVisitDetail = function(taskId) {
   document.getElementById('vd-branch').textContent   = v.branch || '—';
   document.getElementById('vd-customer').textContent = v.customer_name || '—';
   document.getElementById('vd-item').textContent     = v.item_name || '—';
+  document.getElementById('vd-appt').textContent    = v.appt_time || '—';
+  document.getElementById('vd-visited').textContent = (v.checkin || '—') + ' – ' + (v.checkout || '—');
+  document.getElementById('vd-gap').innerHTML       = fmtGap(v.gap_min);
   document.getElementById('vd-time').textContent     = v.in + ' – ' + (v.out || '—');
   document.getElementById('vd-dur').textContent     = fmtDur(v.dur);
   document.getElementById('vd-status').textContent  = v.status || '—';
@@ -1709,7 +1713,11 @@ window.flashRefresh = function() {
       <div class="vd-row"><span class="vd-key">Branch</span><span class="vd-val" id="vd-branch">—</span></div>
       <div class="vd-row"><span class="vd-key">Item</span><span class="vd-val" id="vd-item">—</span></div>
       <div class="vd-sep"></div>
-      <div class="vd-row"><span class="vd-key">Time</span><span class="vd-val" id="vd-time">—</span></div>
+      <div class="vd-row"><span class="vd-key">Appointment Time</span><span class="vd-val" id="vd-appt">—</span></div>
+      <div class="vd-row"><span class="vd-key">Visited Time</span><span class="vd-val" id="vd-visited">—</span></div>
+      <div class="vd-row"><span class="vd-key">Gap</span><span class="vd-val" id="vd-gap">—</span></div>
+      <div class="vd-sep"></div>
+      <div class="vd-row"><span class="vd-key">Working Time</span><span class="vd-val" id="vd-time">—</span></div>
       <div class="vd-row"><span class="vd-key">Duration</span><span class="vd-val" id="vd-dur">—</span></div>
       <div class="vd-row"><span class="vd-key">Status</span><span class="vd-val" id="vd-status">—</span></div>
       <div class="vd-sep"></div>
@@ -1719,6 +1727,6 @@ window.flashRefresh = function() {
     </div>
   </div>
 </div>
-<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 12 Jun 2026 13:16&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
+<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 12 Jun 2026 13:23&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
 </body>
 </html>
