@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CT Mobility Overview — Coway | 30 Jun 2026 08:32</title>
+<title>CT Mobility Overview — Coway | 30 Jun 2026 08:37</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
@@ -626,7 +626,7 @@
 <!-- ═══════════════════ END BLOK MAINTENANCE ═══════════════════ -->
 
 <!-- DATA REFRESH TOPBAR -->
-<div class="data-topbar" id="data-topbar" data-updated="2026-06-30T08:32:52">
+<div class="data-topbar" id="data-topbar" data-updated="2026-06-30T08:37:49">
   <div class="dtb-left">
     <div class="dtb-dot"></div>
     <span class="dtb-label">Live Data · CT Mobility</span>
@@ -1126,28 +1126,49 @@ window.closeVisitDetail = function() {
   document.getElementById('vd-backdrop').classList.remove('open');
 };
 
-window.showAssignedPanel = function() {
-  const body = document.getElementById('assigned-body');
-  const count = document.getElementById('assigned-count');
-  document.getElementById('assigned-title').textContent = 'Task Assigned — ' + (activeFilters.date || '—');
-  const list = ASSIGNED_TASKS.filter(t => t.date === activeFilters.date);
-  count.textContent = list.length + ' task' + (list.length !== 1 ? 's' : '');
-  if (list.length === 0) {
-    body.innerHTML = '<div class="assigned-empty">Tidak ada task assigned untuk tanggal ini</div>';
-  } else {
-    body.innerHTML = list.map(t => `
-      <div class="assigned-row">
-        <div class="assigned-task-id">${t.task || '—'}</div>
-        <div class="assigned-row-field"><span class="assigned-row-key">CT</span><span class="assigned-row-val">${t.ct || '—'}</span></div>
-        <div class="assigned-row-field"><span class="assigned-row-key">Branch</span><span class="assigned-row-val">${t.branch || '—'}</span></div>
-        <div class="assigned-row-field"><span class="assigned-row-key">Customer</span><span class="assigned-row-val">${t.customer || '—'}</span></div>
-        <div class="assigned-row-field"><span class="assigned-row-key">Item</span><span class="assigned-row-val">${t.item || '—'}</span></div>
-        <div class="assigned-row-field"><span class="assigned-row-key">Time Slot</span><span class="assigned-row-val">${t.time_slot || '—'}</span></div>
-        <div class="assigned-row-field"><span class="assigned-row-key">CSA Appt</span><span class="assigned-row-val">${t.appt_time_cs || '—'}</span></div>
-      </div>
-    `).join('');
-  }
+function openTaskPanel(title, items, rowHtmlFn) {
+  document.getElementById('assigned-title').textContent = title;
+  document.getElementById('assigned-count').textContent = items.length + ' task' + (items.length !== 1 ? 's' : '');
+  document.getElementById('assigned-body').innerHTML = items.length === 0
+    ? '<div class="assigned-empty">Tidak ada task untuk kategori ini</div>'
+    : items.map(rowHtmlFn).join('');
   document.getElementById('assigned-backdrop').classList.add('open');
+}
+
+window.showAssignedPanel = function() {
+  const list = ASSIGNED_TASKS.filter(t => t.date === activeFilters.date);
+  openTaskPanel('Task Assigned — ' + (activeFilters.date || '—'), list, t => `
+    <div class="assigned-row">
+      <div class="assigned-task-id">${t.task || '—'}</div>
+      <div class="assigned-row-field"><span class="assigned-row-key">CT</span><span class="assigned-row-val">${t.ct || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Branch</span><span class="assigned-row-val">${t.branch || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Customer</span><span class="assigned-row-val">${t.customer || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Item</span><span class="assigned-row-val">${t.item || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Time Slot</span><span class="assigned-row-val">${t.time_slot || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">CSA Appt</span><span class="assigned-row-val">${t.appt_time_cs || '—'}</span></div>
+    </div>
+  `);
+};
+
+window.showStatusPanel = function(key) {
+  const filters = {
+    checkin:   v => (v.status||'').toLowerCase().includes('check'),
+    working:   v => (v.status||'').toLowerCase().includes('working'),
+    completed: v => (v.status||'').toLowerCase().includes('complet'),
+    postponed: v => (v.status||'').toLowerCase().includes('postpon'),
+  };
+  const labels = { checkin: 'Check-in', working: 'Working', completed: 'Completed', postponed: 'Postponed' };
+  const list = currentVisits.filter(filters[key]);
+  openTaskPanel(labels[key] + ' — ' + (activeFilters.date || '—'), list, v => `
+    <div class="assigned-row" onclick="closeAssignedPanel();showVisitDetail('${v.task}')" style="cursor:pointer">
+      <div class="assigned-task-id">${v.task || '—'}</div>
+      <div class="assigned-row-field"><span class="assigned-row-key">CT</span><span class="assigned-row-val">${v.name || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Branch</span><span class="assigned-row-val">${v.branch || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Customer</span><span class="assigned-row-val">${v.customer_name || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Item</span><span class="assigned-row-val">${v.item_name || '—'}</span></div>
+      <div class="assigned-row-field"><span class="assigned-row-key">Status</span><span class="assigned-row-val">${v.status || '—'}</span></div>
+    </div>
+  `);
 };
 
 window.closeAssignedPanel = function() {
@@ -1220,10 +1241,10 @@ function renderInsight() {
   const assignedForDate = ASSIGNED_TASKS.filter(t => t.date === activeFilters.date);
 
   const cards2 = [
-    { val: cntCheckin,            lbl: 'Check-in',      cls: '', tip: 'Number of visits with status Check-in' },
-    { val: cntWorking,            lbl: 'Working',       cls: cntWorking > 0 ? 'warn' : '', tip: 'Number of visits with status Working' },
-    { val: completed,             lbl: 'Completed',     cls: completed > 0 ? 'good' : '', tip: 'Number of visits with status Completed/Ready to Complete' },
-    { val: cntPostponed,          lbl: 'Postponed',     cls: cntPostponed > 0 ? 'bad' : '', tip: 'Number of visits with status Postponed' },
+    { val: cntCheckin,            lbl: 'Check-in',      cls: '', tip: 'Number of visits with status Check-in — klik untuk lihat list', onclick: "showStatusPanel('checkin')" },
+    { val: cntWorking,            lbl: 'Working',       cls: cntWorking > 0 ? 'warn' : '', tip: 'Number of visits with status Working — klik untuk lihat list', onclick: "showStatusPanel('working')" },
+    { val: completed,             lbl: 'Completed',     cls: completed > 0 ? 'good' : '', tip: 'Number of visits with status Completed/Ready to Complete — klik untuk lihat list', onclick: "showStatusPanel('completed')" },
+    { val: cntPostponed,          lbl: 'Postponed',     cls: cntPostponed > 0 ? 'bad' : '', tip: 'Number of visits with status Postponed — klik untuk lihat list', onclick: "showStatusPanel('postponed')" },
     { val: assignedForDate.length, lbl: 'Task Assigned', cls: assignedForDate.length > 0 ? 'warn' : '', tip: 'Tasks assigned on the selected date but not yet started — klik untuk lihat list', onclick: 'showAssignedPanel()', center: true },
   ];
 
@@ -1934,6 +1955,6 @@ window.flashRefresh = function() {
     </div>
   </div>
 </div>
-<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 30 Jun 2026 08:32&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
+<div style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(255,255,255,0.92);border:1px solid #e2e6ef;border-radius:20px;padding:6px 14px;font-size:11px;font-family:monospace;color:#8a92a6;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px;"><span style="color:#00c97a;">●</span>Updated: 30 Jun 2026 08:37&nbsp;·&nbsp;<span title="Halaman auto-refresh tiap 30 menit">⟳ 30m</span></div>
 </body>
 </html>
